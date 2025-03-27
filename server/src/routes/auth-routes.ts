@@ -1,48 +1,45 @@
 import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { User } from '../models';  // Adjust path as necessary
+import bcrypt from 'bcryptjs';
+import { User } from '../models/user.js';  // Adjust the path as necessary
 
-export const login = async (req: Request, res: Response) => {
-  try {
+// Login route handler
+const loginHandler = async (req: Request, res: Response) => {
     const { username, password } = req.body;
 
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required' });
+    try {
+        // Fetch user from the database by username
+        const user = await User.findOne({ where: { username } });
+
+        if (!user) {
+            return res.status(400).json({ error: 'User not found' });
+        }
+
+        // Validate the password using bcrypt.compare
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (!passwordMatch) {
+            return res.status(400).json({ error: 'Invalid credentials' });
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { userId: user.id, username: user.username },
+            'your-secret-key', // Replace with an actual secret key in a real app
+            { expiresIn: '1h' }
+        );
+
+        // Log the generated token (remove in production)
+        console.log('Generated token:', token);
+
+        // Send the token as a response
+        return res.json({ token });
+    } catch (error) {
+        // Handle errors and log them
+        console.error('Error during login:', error);
+        return res.status(500).json({ error: 'Failed to log in' });
     }
-
-    console.log('Login attempt:', { username, password });
-
-    // Find user by username
-    const user = await User.findOne({ where: { username } });
-    if (!user) {
-      console.log('User not found');
-      return res.status(401).json({ error: 'Invalid username or password' });
-    }
-
-    console.log('User found:', user);  // Check if user matches the expected record
-
-    // Compare password with the hashed password in the database
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log('Password validity:', isPasswordValid);
-
-    if (!isPasswordValid) {
-      console.log('Invalid password');
-      return res.status(401).json({ error: 'Invalid username or password' });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { username: user.username },
-      process.env.JWT_SECRET_KEY || 'default_secret',
-      { expiresIn: '15m' }
-    );
-
-    console.log('Generated token:', token);
-
-    return res.json({ token });
-  } catch (error) {
-    console.error('Error during login:', error);  // Detailed logging for debugging
-    return res.status(500).json({ error: 'Failed to log in' });
-  }
 };
+
+// Export the login handler
+export { loginHandler };

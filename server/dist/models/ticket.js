@@ -1,5 +1,14 @@
 import { DataTypes, Model } from 'sequelize';
 export class Ticket extends Model {
+    id;
+    name;
+    status;
+    description;
+    assignedUserId;
+    // associated User model
+    assignedUser;
+    createdAt;
+    updatedAt;
 }
 export function TicketFactory(sequelize) {
     Ticket.init({
@@ -30,3 +39,4 @@ export function TicketFactory(sequelize) {
     });
     return Ticket;
 }
+//# sourceMappingURL=ticket.js.map

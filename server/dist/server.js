@@ -25,3 +25,4 @@ sequelize.sync({ force: process.env.NODE_ENV === 'development' })
         console.log(`Server is listening on port ${PORT}`);
     });
 });
+//# sourceMappingURL=server.js.map

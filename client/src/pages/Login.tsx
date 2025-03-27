@@ -26,9 +26,15 @@ const Login = () => {
     setError(null); // Clear any previous errors
 
     try {
-      const data = await login(loginData);
-      console.log("Login response data:", data); // Log response data to inspect its structure
+      // Log the data sent to the login function
+      console.log("Attempting to log in with data:", loginData);
 
+      const data = await login(loginData);
+
+      // Log the raw response from the login function
+      console.log("Login response data:", data);
+
+      // Check if the token exists in the response
       if (!data.token) {
         console.error("Token is missing or invalid");
         setError("Login failed. Please try again.");
@@ -38,12 +44,35 @@ const Login = () => {
       // Store the token (you can modify this based on your token storage strategy)
       Auth.login(data.token);
 
-      // Redirect the user or show a success message
+      // Log success and redirect or handle accordingly
       console.log("Login successful, token stored!");
       // Optionally redirect to another page, e.g.:
       // window.location.href = '/dashboard';
     } catch (err) {
-      console.error("Failed to login", err);
+      // Log the error to inspect it further
+      console.error("Failed to login, error details:", err);
+
+      // You might want to extract and log error details more explicitly
+      if (err instanceof Error && (err as any).response) {
+        // If you are using axios, this will capture any HTTP response errors
+        if (err instanceof Error && (err as any).response) {
+          console.error("Error response:", (err as any).response);
+        }
+      } else if (
+        err instanceof Error &&
+        (err as any).isAxiosError &&
+        (err as any).request
+      ) {
+        // This will capture if the request was made but no response was received
+        console.error("No response received:", (err as any).request);
+      } else {
+        if (err instanceof Error) {
+          console.error("Error message:", err.message);
+        } else {
+          console.error("An unknown error occurred:", err);
+        }
+      }
+
       setError("An error occurred while logging in. Please try again.");
     } finally {
       setLoading(false); // Stop loading

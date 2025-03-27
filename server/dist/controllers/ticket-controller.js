@@ -92,3 +92,4 @@ export const deleteTicket = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+//# sourceMappingURL=ticket-controller.js.map

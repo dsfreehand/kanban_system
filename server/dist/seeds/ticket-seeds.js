@@ -8,3 +8,4 @@ export const seedTickets = async () => {
         { name: 'Deploy to production', status: 'Todo', description: 'Deploy the application to Render.', assignedUserId: 2 },
     ]);
 };
+//# sourceMappingURL=ticket-seeds.js.map

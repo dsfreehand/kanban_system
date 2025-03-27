@@ -5,3 +5,4 @@ const router = Router();
 router.use('/tickets', ticketRouter);
 router.use('/users', userRouter);
 export default router;
+//# sourceMappingURL=index.js.map
