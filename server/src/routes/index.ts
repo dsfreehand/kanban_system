@@ -1,11 +1,13 @@
 import { Router } from 'express';
-import authRoutes from './auth-routes.js';
+import * as authRoutes from './auth-routes.js'; // Import the named exports
 import apiRoutes from './api/index.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
 
-router.use('/auth', authRoutes);
+// Define the auth routes manually since we have named exports
+router.post('/auth/login', authRoutes.login); // Attach the login route
+
 // TODO: Add authentication to the API routes
 router.use('/api', authenticateToken, apiRoutes);
 
