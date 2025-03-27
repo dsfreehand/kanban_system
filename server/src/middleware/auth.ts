@@ -1,30 +1,79 @@
+import { JwtPayload, jwtDecode } from 'jwt-decode';
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 
-interface JwtPayload {
-  username: string;
+class AuthService {
+  /**
+   * Get the decoded token (profile) from localStorage.
+   */
+  getProfile() {
+    const token = this.getToken();
+    return token ? jwtDecode<JwtPayload>(token) : null;
+  }
+
+  /**
+   * Check if the user is logged in.
+   * Returns true if a valid, unexpired token exists.
+   */
+  loggedIn(): boolean {
+    const token = this.getToken();
+    return token ? !this.isTokenExpired(token) : false;
+  }
+
+  /**
+   * Check if the token is expired.
+   */
+  isTokenExpired(token: string): boolean {
+    try {
+      const decoded = jwtDecode<JwtPayload>(token);
+      if (!decoded.exp) return true; // No expiration field, treat as expired.
+      return decoded.exp * 1000 < Date.now(); // Compare expiration time (in ms) to current time.
+    } catch (error) {
+      console.error('Error checking token expiration:', error);
+      return true; // Treat as expired if any errors occur.
+    }
+  }
+
+  /**
+   * Retrieve the token from localStorage.
+   */
+  getToken(): string {
+    try {
+      return localStorage.getItem('token') || ''; // Default to an empty string if no token exists.
+    } catch (error) {
+      console.error('Error retrieving token:', error);
+      return ''; // Fallback to empty string if localStorage access fails.
+    }
+  }
+
+  /**
+   * Store the token in localStorage and redirect to the home page.
+   */
+  login(idToken: string) {
+    try {
+      console.log('Storing token:', idToken); // Debugging log to verify token.
+      localStorage.setItem('token', idToken);
+      window.location.assign('/'); // Redirect to home page after login.
+    } catch (error) {
+      console.error('Error during login:', error);
+    }
+  }
+
+  /**
+   * Remove the token from localStorage and redirect to the login page.
+   */
+  logout() {
+    try {
+      localStorage.removeItem('token');
+      window.location.assign('/login'); // Redirect to login page after logout.
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  }
 }
 
+
+
 export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-    // TODO: verify the token exists and add the user data to the request object
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) {
-    return res.status(401).json({ message: 'Authorization header missing' });
-  }
-
-  const token = authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(403).json({ message: 'Token not provided' });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default_secret') as JwtPayload;
-    req.user = { username: decoded.username }; // Attach user info to request object
-    return next(); // Move to the next middleware
-  } catch (err) {
-    console.error('Failed to verify token:', err);
-    return res.status(403).json({ message: 'Invalid or expired token' });
-  }
+  // Middleware logic
 };
+

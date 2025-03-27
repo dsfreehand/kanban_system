@@ -3,9 +3,10 @@ import { UserLogin } from "../interfaces/UserLogin";
 const login = async (
   userInfo: UserLogin
 ): Promise<{ token?: string; error?: string }> => {
-  // TODO: make a POST request to the login route
+  console.log("Attempting to log in with data:", userInfo);
+
   try {
-    const response = await fetch("/auth/login", {
+    const response = await fetch("http://localhost:3000/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -14,13 +15,22 @@ const login = async (
     });
 
     if (!response.ok) {
-      return { error: "Failed to log in" }; // Return an error object instead of null
+      const errorMessage = await response.text(); // Log detailed server error
+      console.error("Failed to log in:", errorMessage);
+      return { error: "Failed to log in" };
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log("Login API response:", data);
+
+    if (!data.token) {
+      return { error: "Token is missing in response" };
+    }
+
+    return data; // Return the successful response
   } catch (error) {
     console.error("Login error:", error);
-    return { error: "Network error" }; // Always return an object, even on failure
+    return { error: "Network error" };
   }
 };
 

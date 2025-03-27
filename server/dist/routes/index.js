@@ -1,11 +1,13 @@
 import { Router } from 'express';
-import { loginHandler } from './auth-routes'; // Import the login handler from auth-routes
+console.log('Attempting to load auth-routes...');
+import authRouter from './auth-routes.js';
+console.log('Auth routes loaded:', authRouter);
 import apiRoutes from './api/index.js';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticateToken } from '../middleware/auth.js'; // Ensure correct export/import
 const router = Router();
-// Define the login route
-router.post('/auth/login', loginHandler);
-// Define the auth routes and attach the API routes with token authentication middleware
+// Use the auth routes for login and register endpoints
+router.use('/auth', authRouter);
+// Attach the API routes with token authentication middleware
 router.use('/api', authenticateToken, apiRoutes);
 export default router;
 //# sourceMappingURL=index.js.map
