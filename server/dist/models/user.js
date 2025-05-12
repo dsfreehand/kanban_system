@@ -1,11 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import bcrypt from 'bcrypt';
 export class User extends Model {
-    id;
-    username;
-    password;
-    createdAt;
-    updatedAt;
     // Hash the password before saving the user
     async setPassword(password) {
         const saltRounds = 10;
@@ -41,4 +36,3 @@ export function UserFactory(sequelize) {
     });
     return User;
 }
-//# sourceMappingURL=user.js.map

@@ -12,4 +12,3 @@ router.put('/:id', updateTicket);
 // DELETE /tickets/:id - Delete a ticket by id
 router.delete('/:id', deleteTicket);
 export { router as ticketRouter };
-//# sourceMappingURL=ticket-routes.js.map

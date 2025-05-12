@@ -1,74 +1,54 @@
-import { jwtDecode } from 'jwt-decode';
-class AuthService {
-    /**
-     * Get the decoded token (profile) from localStorage.
-     */
-    getProfile() {
-        const token = this.getToken();
-        return token ? jwtDecode(token) : null;
-    }
-    /**
-     * Check if the user is logged in.
-     * Returns true if a valid, unexpired token exists.
-     */
-    loggedIn() {
-        const token = this.getToken();
-        return token ? !this.isTokenExpired(token) : false;
-    }
-    /**
-     * Check if the token is expired.
-     */
-    isTokenExpired(token) {
-        try {
-            const decoded = jwtDecode(token);
-            if (!decoded.exp)
-                return true; // No expiration field, treat as expired.
-            return decoded.exp * 1000 < Date.now(); // Compare expiration time (in ms) to current time.
-        }
-        catch (error) {
-            console.error('Error checking token expiration:', error);
-            return true; // Treat as expired if any errors occur.
-        }
-    }
-    /**
-     * Retrieve the token from localStorage.
-     */
-    getToken() {
-        try {
-            return localStorage.getItem('token') || ''; // Default to an empty string if no token exists.
-        }
-        catch (error) {
-            console.error('Error retrieving token:', error);
-            return ''; // Fallback to empty string if localStorage access fails.
-        }
-    }
-    /**
-     * Store the token in localStorage and redirect to the home page.
-     */
-    login(idToken) {
-        try {
-            console.log('Storing token:', idToken); // Debugging log to verify token.
-            localStorage.setItem('token', idToken);
-            window.location.assign('/'); // Redirect to home page after login.
-        }
-        catch (error) {
-            console.error('Error during login:', error);
-        }
-    }
-    /**
-     * Remove the token from localStorage and redirect to the login page.
-     */
-    logout() {
-        try {
-            localStorage.removeItem('token');
-            window.location.assign('/login'); // Redirect to login page after logout.
-        }
-        catch (error) {
-            console.error('Error during logout:', error);
-        }
-    }
-}
+import jwt from 'jsonwebtoken';
 export const authenticateToken = (req, res, next) => {
-    // Middleware logic
+    // TODO: verify the token exists and add the user data to the request object
+    // Get the authorization header from the request
+    const authHeader = req.headers.authorization;
+    // Check if the authorization header is present
+    if (authHeader) {
+        // Extract the token from the authorization header
+        const token = authHeader.split(' ')[1];
+        // Get the secret key from the environment variables
+        const secretKey = process.env.JWT_SECRET_KEY || '';
+        // Verify the JWT token
+        jwt.verify(token, secretKey, (err, user) => {
+            if (err) {
+                return res.sendStatus(403); // Send forbidden status if the token is invalid
+            }
+            // Attach the user information to the request object
+            req.user = user;
+            return next(); // Call the next middleware function
+        });
+    }
+    else {
+        res.sendStatus(401); // Send unauthorized status if no authorization header is present
+    }
 };
-//# sourceMappingURL=auth.js.map
+// import { Request, Response, NextFunction } from 'express';
+// import jwt from 'jsonwebtoken';
+// // Define the interface for the JWT payload
+// interface JwtPayload {
+//   username: string;
+// }
+// // Middleware function to authenticate JWT token
+// export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
+//   // Get the authorization header from the request
+//   const authHeader = req.headers.authorization;
+//   // Check if the authorization header is present
+//   if (authHeader) {
+//     // Extract the token from the authorization header
+//     const token = authHeader.split(' ')[1];
+//     // Get the secret key from the environment variables
+//     const secretKey = process.env.JWT_SECRET_KEY || '';
+//     // Verify the JWT token
+//     jwt.verify(token, secretKey, (err, user) => {
+//       if (err) {
+//         return res.sendStatus(403); // Send forbidden status if the token is invalid
+//       }
+//       // Attach the user information to the request object
+//       req.user = user as JwtPayload;
+//       return next(); // Call the next middleware function
+//     });
+//   } else {
+//     res.sendStatus(401); // Send unauthorized status if no authorization header is present
+//   }
+// };

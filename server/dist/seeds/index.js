@@ -17,4 +17,3 @@ const seedAll = async () => {
     }
 };
 seedAll();
-//# sourceMappingURL=index.js.map

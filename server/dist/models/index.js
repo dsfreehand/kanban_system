@@ -17,4 +17,3 @@ const Ticket = TicketFactory(sequelize);
 User.hasMany(Ticket, { foreignKey: 'assignedUserId' });
 Ticket.belongsTo(User, { foreignKey: 'assignedUserId', as: 'assignedUser' });
 export { sequelize, User, Ticket };
-//# sourceMappingURL=index.js.map

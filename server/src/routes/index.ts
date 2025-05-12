@@ -1,16 +1,13 @@
 import { Router } from 'express';
-console.log('Attempting to load auth-routes...');
-import authRouter from './auth-routes.js';
-console.log('Auth routes loaded:', authRouter);
+import authRoutes from './auth-routes.js';
 import apiRoutes from './api/index.js';
-import { authenticateToken } from '../middleware/auth.js'; // Ensure correct export/import
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
 
-// Use the auth routes for login and register endpoints
-router.use('/auth', authRouter);
-
-// Attach the API routes with token authentication middleware
+router.use('/auth', authRoutes);
+// TODO: Add authentication to the API routes
 router.use('/api', authenticateToken, apiRoutes);
+// router.use('/api', apiRoutes);
 
 export default router;
